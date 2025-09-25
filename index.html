@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shift Hour Calculator</title>
+  <title>Shift Logout Time Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -64,26 +64,20 @@
 
     .result {
       margin-top: 20px;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
+      color: green;
     }
-
-    .success { color: green; }
-    .warning { color: orange; }
-    .danger { color: red; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Shift Hour Calculator</h2>
+    <h2>Shift Logout Time Calculator</h2>
     <form id="shiftForm">
       <label for="login">Login Time:</label>
       <input type="time" id="login" required>
 
-      <label for="logout">Logout Time:</label>
-      <input type="time" id="logout" required>
-
-      <button type="submit">Check Hours</button>
+      <button type="submit">Calculate Logout Time</button>
     </form>
 
     <div class="result" id="result"></div>
@@ -94,48 +88,25 @@
       e.preventDefault();
 
       let login = document.getElementById("login").value;
-      let logout = document.getElementById("logout").value;
 
-      if (!login || !logout) {
-        document.getElementById("result").innerHTML = "<span class='danger'>Please enter both times!</span>";
+      if (!login) {
+        document.getElementById("result").textContent = "Please enter login time!";
         return;
       }
 
       let [loginH, loginM] = login.split(":").map(Number);
-      let [logoutH, logoutM] = logout.split(":").map(Number);
 
       let loginDate = new Date();
       loginDate.setHours(loginH, loginM, 0);
 
-      let logoutDate = new Date();
-      logoutDate.setHours(logoutH, logoutM, 0);
+      // Add 8 hours 30 minutes
+      loginDate.setMinutes(loginDate.getMinutes() + (8 * 60 + 30));
 
-      // Handle night shifts (next day logout)
-      if (logoutDate < loginDate) {
-        logoutDate.setDate(logoutDate.getDate() + 1);
-      }
+      let logoutH = loginDate.getHours().toString().padStart(2, "0");
+      let logoutM = loginDate.getMinutes().toString().padStart(2, "0");
 
-      let diffMs = logoutDate - loginDate;
-      let hours = Math.floor(diffMs / (1000 * 60 * 60));
-      let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-      let totalMinutes = hours * 60 + minutes;
-      let shiftMinutes = 8 * 60 + 30; // 8 hours 30 minutes = 510 mins
-
-      let message = `Worked: ${hours} hrs ${minutes} mins<br>`;
-      if (totalMinutes === shiftMinutes) {
-        message += "<span class='success'>✅ Perfect! Completed 8.5 hours shift.</span>";
-      } else if (totalMinutes < shiftMinutes) {
-        let short = shiftMinutes - totalMinutes;
-        let sh = Math.floor(short / 60), sm = short % 60;
-        message += `<span class='danger'>⚠️ Undertime by ${sh} hrs ${sm} mins</span>`;
-      } else {
-        let extra = totalMinutes - shiftMinutes;
-        let eh = Math.floor(extra / 60), em = extra % 60;
-        message += `<span class='warning'>⏱️ Overtime by ${eh} hrs ${em} mins</span>`;
-      }
-
-      document.getElementById("result").innerHTML = message;
+      document.getElementById("result").textContent = 
+        `Expected Logout Time: ${logoutH}:${logoutM}`;
     });
   </script>
 </body>
