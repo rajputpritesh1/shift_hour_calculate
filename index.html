@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shift Hour Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      width: 350px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin: 10px 0 5px;
+      text-align: left;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Shift Hour Calculator</h2>
+    <form id="shiftForm">
+      <label for="login">Login Time:</label>
+      <input type="time" id="login" required>
+
+      <label for="logout">Logout Time:</label>
+      <input type="time" id="logout" required>
+
+      <button type="submit">Calculate Hours</button>
+    </form>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById("shiftForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      let login = document.getElementById("login").value;
+      let logout = document.getElementById("logout").value;
+
+      if (!login || !logout) {
+        document.getElementById("result").textContent = "Please enter both times!";
+        return;
+      }
+
+      let [loginH, loginM] = login.split(":").map(Number);
+      let [logoutH, logoutM] = logout.split(":").map(Number);
+
+      let loginDate = new Date();
+      loginDate.setHours(loginH, loginM, 0);
+
+      let logoutDate = new Date();
+      logoutDate.setHours(logoutH, logoutM, 0);
+
+      // Handle night shifts (logout next day)
+      if (logoutDate < loginDate) {
+        logoutDate.setDate(logoutDate.getDate() + 1);
+      }
+
+      let diffMs = logoutDate - loginDate;
+      let hours = Math.floor(diffMs / (1000 * 60 * 60));
+      let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+      document.getElementById("result").textContent = 
+        `Total Working Hours: ${hours} hrs ${minutes} mins`;
+    });
+  </script>
+</body>
+</html>
