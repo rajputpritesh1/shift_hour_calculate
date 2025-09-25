@@ -20,7 +20,7 @@
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      width: 350px;
+      width: 360px;
       text-align: center;
     }
 
@@ -64,10 +64,13 @@
 
     .result {
       margin-top: 20px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
-      color: #2563eb;
     }
+
+    .success { color: green; }
+    .warning { color: orange; }
+    .danger { color: red; }
   </style>
 </head>
 <body>
@@ -80,7 +83,7 @@
       <label for="logout">Logout Time:</label>
       <input type="time" id="logout" required>
 
-      <button type="submit">Calculate Hours</button>
+      <button type="submit">Check Hours</button>
     </form>
 
     <div class="result" id="result"></div>
@@ -94,7 +97,7 @@
       let logout = document.getElementById("logout").value;
 
       if (!login || !logout) {
-        document.getElementById("result").textContent = "Please enter both times!";
+        document.getElementById("result").innerHTML = "<span class='danger'>Please enter both times!</span>";
         return;
       }
 
@@ -107,7 +110,7 @@
       let logoutDate = new Date();
       logoutDate.setHours(logoutH, logoutM, 0);
 
-      // Handle night shifts (logout next day)
+      // Handle night shifts (next day logout)
       if (logoutDate < loginDate) {
         logoutDate.setDate(logoutDate.getDate() + 1);
       }
@@ -116,8 +119,23 @@
       let hours = Math.floor(diffMs / (1000 * 60 * 60));
       let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-      document.getElementById("result").textContent = 
-        `Total Working Hours: ${hours} hrs ${minutes} mins`;
+      let totalMinutes = hours * 60 + minutes;
+      let shiftMinutes = 8 * 60 + 30; // 8 hours 30 minutes = 510 mins
+
+      let message = `Worked: ${hours} hrs ${minutes} mins<br>`;
+      if (totalMinutes === shiftMinutes) {
+        message += "<span class='success'>✅ Perfect! Completed 8.5 hours shift.</span>";
+      } else if (totalMinutes < shiftMinutes) {
+        let short = shiftMinutes - totalMinutes;
+        let sh = Math.floor(short / 60), sm = short % 60;
+        message += `<span class='danger'>⚠️ Undertime by ${sh} hrs ${sm} mins</span>`;
+      } else {
+        let extra = totalMinutes - shiftMinutes;
+        let eh = Math.floor(extra / 60), em = extra % 60;
+        message += `<span class='warning'>⏱️ Overtime by ${eh} hrs ${em} mins</span>`;
+      }
+
+      document.getElementById("result").innerHTML = message;
     });
   </script>
 </body>
